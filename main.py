@@ -1,12 +1,11 @@
 from PySimpleGUI import PySimpleGUI as sg
-from dbManagement import ajouterFilm
+from dbManagement import ajouterFilm, supprimerFilm, modifFilm
 import sqlite3
 
 def rafraichir():
     curseur.execute("SELECT * FROM films")
     vus = list(curseur.fetchall())
     window['-films_vus-'].update(values = vus)
-
 
 connect = sqlite3.connect('films.db')
 curseur = connect.cursor()
@@ -18,21 +17,13 @@ curseur.close()
 ############################
 curseur = connect.cursor()
 
-
-
 layout = [[sg.Input(default_text="Pulp Fiction", border_width= None, enable_events= True, key="-titre-")],
              [sg.Listbox(values = vus, enable_events= True, size=(40, 10), key="-films_vus-")],
              [sg.Button(button_text= "ajouter", enable_events= True, key ='-ajouter-'),
              sg.Button(button_text= "modifier", enable_events= True, key = '-modifier-'),
              sg.Button(button_text= "supprimer", enable_events= True, key = '-supprimer-')]]
 
-
-
-
-
 window = sg.Window(title="Movie Tracker", layout= layout, icon = 'something.ico', resizable= True)
-
-
 
 while True:
     
@@ -47,11 +38,18 @@ while True:
         ajouterFilm(nouveauTitre)
         rafraichir()
 
+
         
     if event == "-supprimer-":
-        
-        print(curseur.fetchall())
+        titreSuppr = layout[1][0].get()[0][0]
+        supprimerFilm(titreSuppr)
+        rafraichir()
 
+    if event == "-modifier-":
+        nouveau = layout[0][0].get()
+        ancien = layout[1][0].get()[0][0]
+        modifFilm(ancien, nouveau)
+        rafraichir()
     
 
 connect.commit()
