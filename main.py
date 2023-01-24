@@ -2,11 +2,23 @@ from PySimpleGUI import PySimpleGUI as sg
 from dbManagement import ajouterFilm
 import sqlite3
 
+def rafraichir():
+    curseur.execute("SELECT * FROM films")
+    vus = list(curseur.fetchall())
+    window['-films_vus-'].update(values = vus)
+
+
 connect = sqlite3.connect('films.db')
 curseur = connect.cursor()
+#affiche la liste de la bdd
+curseur.execute("SELECT * FROM films")
+vus = list(curseur.fetchall())
+#ferme le curseur pour ne pas poser de probleme pendant le programme
+curseur.close()
+############################
+curseur = connect.cursor()
 
-aRegarder = []
-vus = []
+
 
 layout = [[sg.Input(default_text="Pulp Fiction", border_width= None, enable_events= True, key="-titre-")],
              [sg.Listbox(values = vus, enable_events= True, size=(40, 10), key="-films_vus-")],
@@ -21,19 +33,23 @@ layout = [[sg.Input(default_text="Pulp Fiction", border_width= None, enable_even
 window = sg.Window(title="Movie Tracker", layout= layout, icon = 'something.ico', resizable= True)
 
 
+
 while True:
     
     event, values = window.read()
     
+   
+
     if event == sg.WIN_CLOSED:
         break
     if event == "-ajouter-":
-        ajouterFilm(layout[0][0].get())
+        nouveauTitre = layout[0][0].get()
+        ajouterFilm(nouveauTitre)
+        rafraichir()
+
         
     if event == "-supprimer-":
-        curseur.execute("SELECT * FROM films")
-        vus = list(curseur.fetchall())
-        window['-films_vus-'].update(vus)
+        
         print(curseur.fetchall())
 
     
